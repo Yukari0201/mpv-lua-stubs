@@ -185,6 +185,18 @@ function mp.get_time() end
 --
 -- After calling this function, key presses will cause the function `fn` to
 -- be called (unless the user remapped the key with another binding).
+-- However, if the key binding is canceled , the function will not be called,
+-- unless `complex` flag is set to `true`, where the function will be
+-- called with the `canceled` entry set to `true`.
+--
+-- For example, a canceled key binding can happen in the following situations:
+--
+-- - If key A is pressed while key B is being held down, key B is logically
+--   released ("canceled" by key A), which stops the current autorepeat
+--   action key B has.
+-- - If key A is pressed while a mouse button is being held down, the mouse
+--   button is logically released, but the mouse button's action will not be
+--   called, unless `complex` flag is set to `true`.
 --
 -- The `name` argument should be a short symbolic string. It allows the user
 -- to remap the key binding via input.conf using the `script-message`
@@ -196,12 +208,19 @@ function mp.get_time() end
 -- or pass the `fn` argument in place of the name. The latter is not
 -- recommended and is handled for compatibility only.)
 --
--- The last argument is used for optional flags. This is a table, which can
--- have the following entries:
+-- The `flags` argument is used for optional parameters. This is a table,
+-- which can have the following entries:
 --
 --     `repeatable`
 --         If set to `true`, enables key repeat for this specific binding.
 --         This option only makes sense when `complex` is not set to `true`.
+--        
+--     `scalable`
+--         If set to `true`, enables key scaling for this specific binding.
+--         This option only makes sense when `complex` is set to `true`.
+--         Note that this has no effect if the key binding is invoked by
+--         `script-binding` command, where the scalability of the command
+--         takes precedence.
 --
 --     `complex`
 --         If set to `true`, then `fn` is called on key down, repeat and up
@@ -211,10 +230,14 @@ function mp.get_time() end
 --             `event`
 --                 Set to one of the strings `down`, `repeat`, `up` or
 --                 `press` (the latter if key up/down/repeat can't be
---                 tracked).
+--                 tracked), which indicates the key's logical state.
 --
 --             `is_mouse`
---                 Boolean Whether the event was caused by a mouse button.
+--                 Boolean: Whether the event was caused by a mouse button.
+--
+--             `canceled`
+--                 Boolean: Whether the event was canceled.
+--                 Not all types of cancellations set this flag.
 --
 --             `key_name`
 --                 The name of they key that triggered this, or `nil` if
@@ -225,6 +248,15 @@ function mp.get_time() end
 --                 Text if triggered by a text key, otherwise `nil`. See
 --                 description of `script-binding` command for details (this
 --                 field is equivalent to the 5th argument).
+--
+--             `scale`
+--                 The scale of the key, such as the ones produced by `WHEEL_*`
+--                 keys. The scale is 1 if the key is nonscalable.
+--
+--             `arg`
+--                 User-provided string in the `arg` argument in the
+--                 `script-binding` command if the key binding is invoked
+--                 by that command.
 --
 -- Internally, key bindings are dispatched via the `script-message-to` or
 -- `script-binding` input commands and `mp.register_script_message`.
@@ -397,7 +429,7 @@ function mp.add_timeout(seconds, fn, disabled) end
 --     seconds = 0
 --     timer = mp.add_periodic_timer(1, function()
 --         print("called every second")
---         # stop it after 10 seconds
+--         -- stop it after 10 seconds
 --         seconds = seconds + 1
 --         if seconds >= 10 then
 --             timer:kill()
@@ -526,6 +558,21 @@ function mp.create_osd_overlay(format) end
 --
 -- May return invalid/nonsense values if OSD is not initialized yet.
 function mp.get_osd_size() end
+
+-- (global)
+-- Make the script exit at the end of the current event loop iteration. This
+-- does not terminate mpv itself or other scripts.
+--
+-- This can be polyfilled to support mpv versions older than 0.40 with:
+--
+-- ```lua
+--     if not _G.exit then
+--         function exit()
+--             mp.keep_running = false
+--         end
+--     end
+-- ```
+function exit() end
 
 -- # Extras
 -- This documents experimental features, or features that are "too special" to
