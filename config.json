@@ -1,7 +1,7 @@
 {
     "name": "mpv-lua-stubs",
     "description": "Type definitions / stub for mpv Lua scripting (mp, mp.msg, mp.utils, etc.), for Lua Language Server",
-    "version": "0.38",
+    "version": "0.40",
     "words": [
         "require\\s*\\(\\s*\"mp\"\\s*\\)",
         "require\\s*\\(\\s*\"mp\\.msg\"\\s*\\)",
