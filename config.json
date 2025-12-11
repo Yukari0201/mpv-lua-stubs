@@ -1,0 +1,18 @@
+{
+    "name": "mpv-lua-stubs",
+    "description": "Type definitions / stub for mpv Lua scripting (mp, mp.msg, mp.utils, etc.), for Lua Language Server",
+    "version": "0.40",
+    "words": [
+        "require\\s*\\(\\s*\"mp\"\\s*\\)",
+        "require\\s*\\(\\s*\"mp\\.msg\"\\s*\\)",
+        "require\\s*\\(\\s*\"mp\\.utils\"\\s*\\)",
+        "require\\s*\\(\\s*\"mp\\.input\"\\s*\\)"
+    ],
+    "files": [],
+    "settings": {
+        "Lua.workspace.library": [
+            "library"
+        ],
+        "Lua.runtime.version": "LuaJIT"
+    }
+}
