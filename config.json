@@ -10,6 +10,9 @@
         "require\\s*\\(\\s*\"mp\\.input\"\\s*\\)"
     ],
     "settings": {
+        "Lua.diagnostics.globals": [
+            "mp"
+        ],
         "Lua.workspace.library": [
             "library"
         ],
