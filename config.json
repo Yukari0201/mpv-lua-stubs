@@ -1,17 +1,14 @@
 {
+    "$schema": "https://raw.githubusercontent.com/LuaLS/LLS-Addons/main/schemas/addon_config.schema.json",
     "name": "mpv-lua-stubs",
     "description": "Type definitions / stub for mpv Lua scripting (mp, mp.msg, mp.utils, etc.), for Lua Language Server",
     "version": "0.40",
     "words": [
-        "require\\s*\\(\\s*\"mp\"\\s*\\)",
-        "require\\s*\\(\\s*\"mp\\.msg\"\\s*\\)",
-        "require\\s*\\(\\s*\"mp\\.utils\"\\s*\\)",
-        "require\\s*\\(\\s*\"mp\\.input\"\\s*\\)"
+        "require\\s*(?:\\(\\s*\"mp(?:\\.[%w_]+)*\"\\s*\\)|\"mp(?:\\.[%w_]+)*\")"
     ],
-    "files": [],
     "settings": {
-        "Lua.workspace.library": [
-            "library"
+        "Lua.diagnostics.globals": [
+            "mp"
         ],
         "Lua.runtime.version": "LuaJIT"
     }
