@@ -41,6 +41,7 @@ jobs:
           import subprocess
 
           json_path = 'mpv.json'
+          config_json_path = 'config.json'
           latest_tag = "${{ steps.get_version.outputs.latest_tag }}"
           
           # 读取本地版本记录
@@ -67,6 +68,18 @@ jobs:
               # 更新版本文件
               with open(json_path, 'w') as f:
                   json.dump({"version": latest_tag}, f, indent=2)
+              
+              # --- 修改 config.json 中的 version 字段 ---
+              if os.path.exists(config_json_path):
+                  with open(config_json_path, 'r') as f:
+                      config_data = json.load(f)
+                  
+                  # 更新字段）
+                  config_data['version'] = latest_tag
+                  
+                  with open(config_json_path, 'w') as f:
+                      json.dump(config_data, f, indent=2)
+                  print(f"Updated {config_json_path} to {latest_tag}")
               
               with open(os.environ['GITHUB_OUTPUT'], 'a') as go:
                   go.write("updated=true\n")
