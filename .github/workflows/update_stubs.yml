@@ -1,0 +1,86 @@
+name: Update mpv Lua Stubs (Dev)
+
+on:
+  schedule:
+    # 每天凌晨 0 点执行 (UTC)
+    - cron: "0 0 * * *"
+  workflow_dispatch: # 允许手动点击运行
+
+jobs:
+  check-and-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # 赋予推送权限
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: dev  # 强制检出 dev 分支
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install Pandoc
+        uses: pandoc/actions/setup@v1
+
+      - name: Get latest mpv release
+        id: get_version
+        run: |
+          # 调用 GitHub API 获取 mpv 最新 tag
+          LATEST_TAG=$(curl -s https://api.github.com/repos/mpv-player/mpv/releases/latest | jq -r .tag_name)
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+
+      - name: Check version and Run logic
+        id: run_logic
+        run: |
+          import json
+          import os
+          import subprocess
+
+          json_path = 'mpv.json'
+          latest_tag = "${{ steps.get_version.outputs.latest_tag }}"
+          
+          # 读取本地版本记录
+          if os.path.exists(json_path):
+              with open(json_path, 'r') as f:
+                  data = json.load(f)
+                  current_version = data.get('version', 'v0.0.0')
+          else:
+              current_version = 'v0.0.0'
+
+          if latest_tag != current_version:
+              print(f"New version {latest_tag} found! (Local: {current_version})")
+              
+              # --- 第一步：下载最新的 mpv 文档源文件 ---
+              subprocess.run(["curl", "-L", "-o", "lua.rst", f"https://raw.githubusercontent.com/mpv-player/mpv/refs/tags/{latest_tag}/DOCS/man/lua.rst"])
+              
+              # --- 第二步：使用 Pandoc 进行转换 ---
+              # pandoc lua.rst -f rst -t markdown-definition_lists --lua-filter=./scripts/fix-code.lua --lua-filter=./scripts/complete_uri.lua -o lua.md
+              subprocess.run(["pandoc", "lua.rst", "-f", "rst", "-t", "markdown-definition_lists", "--lua-filter=./scripts/fix-code.lua", "--lua-filter=./scripts/complete_uri.lua", "-o", "lua.md"])
+              
+              # --- 第三步：运行你的 Python 转换脚本 ---
+              subprocess.run(["python", "scripts/convert.py"])
+              
+              # 更新版本文件
+              with open(json_path, 'w') as f:
+                  json.dump({"version": latest_tag}, f, indent=2)
+              
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as go:
+                  go.write("updated=true\n")
+          else:
+              print("Version match. Skipping.")
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as go:
+                  go.write("updated=false\n")
+        shell: python
+
+      - name: Commit and Push changes
+        if: steps.run_logic.outputs.updated == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add library/ mpv.json config.json
+          git commit -m "chore(dev): auto-update stubs to ${{ steps.get_version.outputs.latest_tag }}"
+          git push origin dev
