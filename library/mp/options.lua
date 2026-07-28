@@ -4,12 +4,12 @@ options = {}
 -- A `table` with key-value pairs. The type of the default values is
 -- important for converting the values read from the config file or
 -- command-line back. Do not use `nil` as a default value!
--- 
+--
 -- The `identifier` is used to identify the config-file and the
 -- command-line options. These needs to unique to avoid collisions with
 -- other scripts. Defaults to `mp.get_script_name()` if the parameter is
 -- `nil` or missing.
--- 
+--
 -- The `on_update` parameter enables run-time updates of all matching
 -- option values via the `script-opts` option/property. If any of the
 -- matching options changes, the values in the `table` (which was
@@ -23,45 +23,43 @@ options = {}
 -- entries are only written for option values whose values effectively
 -- change (this is important if the script changes `table` entries
 -- independently).
--- 
+--
 -- Example implementation:
--- 
+--
 -- ```
 -- local options = {
 --     optionA = "defaultvalueA",
 --     optionB = -0.5,
 --     optionC = true,
 -- }
--- 
+--
 -- require "mp.options".read_options(options, "myscript")
 -- print(options.optionA)
 -- ```
--- 
+--
 -- The config file will be stored in `script-opts/identifier.conf` in
 -- mpv\'s user folder. Comment lines can be started with \# and stray
 -- spaces are not removed. Boolean values will be represented with yes/no.
--- 
+--
 -- Example config:
--- 
+--
 -- ```
 -- # comment
 -- optionA=Hello World
 -- optionB=9999
 -- optionC=no
 -- ```
--- 
+--
 -- Command-line options are read from the `--script-opts` parameter. To
 -- avoid collisions, all keys have to be prefixed with `identifier-`.
--- 
+--
 -- Example command-line:
--- 
+--
 -- ```
 -- --script-opts=myscript-optionA=TEST,myscript-optionB=0,myscript-optionC=yes
 -- ```
--- 
----@param table any
----@param identifier any
----@param on_update any
+--
+---@param table table
 function options.read_options(table, identifier, on_update) end
 function options.read_options(table) end
 
