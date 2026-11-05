@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/LuaLS/LLS-Addons/main/schemas/addon_config.schema.json",
   "name": "mpv-lua-stubs",
   "description": "Type definitions / stub for mpv Lua scripting (mp, mp.msg, mp.utils, etc.), for Lua Language Server",
-  "version": "v0.41.0",
+  "version": "v0.42.0",
   "words": [
     "require\\s*(?:\\(\\s*\"mp(?:\\.[%w_]+)*\"\\s*\\)|\"mp(?:\\.[%w_]+)*\")"
   ],

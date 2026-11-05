@@ -13,11 +13,16 @@ input = {}
 -- the text in the console.
 --
 -- `keep_open`
--- Whether to keep the console open on submit. Defaults to `false`.
+-- Whether to keep the console open on submit, allowing further input.
+-- Defaults to `false`.
+--
+-- If calling `input.get()` or `input.select()` again from inside the
+-- `submit` callback, setting this option to `true` allows a seamless
+-- transition without the console closing and reopening.
 --
 -- `opened`
 -- A callback invoked when the console is shown. This can be used to
--- present a list of options with `input.set_log()`.
+-- override keybinds set by the console with `mp.add_forced_key_binding()`.
 --
 -- `edited`
 -- A callback invoked when the text changes. The first argument is the text
@@ -25,14 +30,22 @@ input = {}
 --
 -- `complete`
 -- A callback invoked when the user edits the text or moves the cursor. The
--- first argument is the text before the cursor. The callback should return
--- a table of the string candidate completion values and the 1-based cursor
--- position from which the completion starts. console will show the
--- completions that fuzzily match the text between this position and the
--- cursor and allow selecting them.
+-- first argument is the text before the cursor, and the second argument is
+-- a response function which can be called to present completion values to
+-- the user.
 --
--- The third and optional return value is a string that will be appended to
--- the input line without displaying it in the completions.
+-- The first argument to the response function is a table of the string
+-- candidate completion values, and the second argument is the 1-based
+-- cursor position from which the completion starts. console will show the
+-- completions that fuzzily match the text between this position and the
+-- cursor, which the user can select with `TAB`. The completions will only
+-- be shown to the user if the text before the cursor has not since
+-- changed. The response function should be called with an empty table if
+-- there are no completion values to display.
+--
+-- The third and optional argument to the response function is a string
+-- that will be appended to the input line without displaying it in the
+-- completions.
 --
 -- `autoselect_completion`
 -- Whether to automatically select the first completion on submit if one
@@ -61,25 +74,25 @@ function input.get(table) end
 -- among the ones stored for `input.get()` calls. Defaults to the calling
 -- script name with `prompt` appended.
 --
+-- `console_opt_overrides`
+-- A table containing configuration overrides for the console script. Can
+-- be used to change the visual style of the text input, among other
+-- things. See [CONSOLE](https://mpv.io/manual/stable/#console) for the
+-- full list of options.
+--
 function input.terminate() end
 
--- Add a line to the log buffer. `style` can contain additional ASS tags to
--- apply to `message`, and `terminal_style` can contain escape sequences
--- that are used when the console is displayed in the terminal.
+-- Add a line to the log buffer of the latest `input.get()` request.
+-- `style` can contain additional ASS tags to apply to `message`, and
+-- `terminal_style` can contain escape sequences that are used when the
+-- console is displayed in the terminal.
 --
 ---@param message string
 ---@param style string
 ---@param terminal_style string
 function input.log(message, style, terminal_style) end
 
--- Helper to add a line to the log buffer with the same color as the one
--- used for commands that error. Useful when the user submits invalid
--- input.
---
----@param message string
-function input.log_error(message) end
-
--- Replace the entire log buffer.
+-- Replace the entire log buffer of the latest `input.get()` request.
 --
 -- `log` is a table of strings, or tables with `text`, `style` and
 -- `terminal_style` keys.
@@ -118,22 +131,19 @@ function input.set_log(log) end
 -- the 1-based index of the selected item.
 --
 -- `keep_open`
--- Whether to keep the console open on submit. Defaults to `false`.
+-- Whether to keep the console open on submit, allowing further input.
+-- Defaults to `false`.
 --
--- Example:
+-- If calling `input.get()` or `input.select()` again from inside the
+-- `submit` callback, setting this option to `true` allows a seamless
+-- transition without the console closing and reopening.
 --
--- > ```
--- > input.select({
--- >     items = {
--- >         "First playlist entry",
--- >         "Second playlist entry",
--- >     },
--- >     submit = function (id)
--- >         mp.commandv("playlist-play-index", id - 1)
--- >     end,
--- > })
--- > ```
+-- `opened`
+-- A callback invoked when the console is shown. This can be used to
+-- override keybinds set by the console with `mp.add_forced_key_binding()`.
 --
+-- `closed`
+-- A callback invoked when the console is hidden, either because
 ---@param table table
 function input.select(table) end
 

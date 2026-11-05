@@ -96,15 +96,15 @@ function utils.join_path(p1, p2) end
 -- the `subprocess` command with `mp.command_native`. It does the following
 -- things:
 --
--- -   copy the table `t`
--- -   rename `cancellable` field to `playback_only`
--- -   rename `max_size` to `capture_size`
--- -   set `capture_stdout` field to `true` if unset
--- -   set `name` field to `subprocess`
--- -   call `mp.command_native(copied_t)`
--- -   if the command failed, create a dummy result table
--- -   copy `error_string` to `error` field if the string is non-empty
--- -   return the result table
+-- - copy the table `t`
+-- - rename `cancellable` field to `playback_only`
+-- - rename `max_size` to `capture_size`
+-- - set `capture_stdout` field to `true` if unset
+-- - set `_name` field to `subprocess`
+-- - call `mp.command_native(copied_t)`
+-- - if the command failed, create a dummy result table
+-- - copy `error_string` to `error` field if the string is non-empty
+-- - return the result table
 --
 -- It is recommended to use `mp.command_native` or
 -- `mp.command_native_async` directly, instead of calling this legacy
@@ -175,8 +175,12 @@ function mp.get_property_native() end
 ---@param v any
 ---@return string|nil
 ---@return nil, string
+function utils.format_json(v, pretty) end
 function utils.format_json(v) end
 
+--
+-- If the `pretty` parameter is `true` (or any value equal to `true`), then
+-- the output string is formatted and indented for human consumption.
 --
 ---@return boolean|nil
 ---@return nil, string
